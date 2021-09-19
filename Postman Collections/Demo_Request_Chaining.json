@@ -1,0 +1,228 @@
+{
+  "info": {
+    "_postman_id": "fc97d060-bf2f-467f-b3c3-966a162fbfa4",
+    "name": "Demo_Request_Chaining",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "REGISTER",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "f66d0390-fbd8-43ea-a441-c1a554855cdf",
+            "exec": [
+              "//the order of request execution is changed by using the following script\r",
+              "postman.setNextRequest('LOGIN');\r",
+              "\r",
+              "//Set variables from response\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    var responseData = pm.response.json();\r",
+              "    pm.collectionVariables.unset('userId')\r",
+              "    pm.collectionVariables.set('userId',responseData.id)\r",
+              "    // pm.environment.set('userId',responseData.id)\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Successful POST request\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201, 202,200]);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "7af16f1b-77eb-4757-86f0-d66068d3931e",
+            "exec": [
+              "// pm.globals.set(\"email\", pm.iterationData.get(\"email\"))\r",
+              "// pm.globals.set(\"password\", pm.iterationData.get(\"password\"))\r",
+              "\r",
+              "// //Display varianbles\r",
+              "// console.log(\"email :\" + pm.globals.get(\"email\"));\r",
+              "// console.log(\"Password : \"+pm.globals.get(\"password\"));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "4bbd7e90-746f-4611-b88b-3bf71aebe54a",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/register"
+      },
+      "response": []
+    },
+    {
+      "name": "GET USER",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "daad01c4-fdf6-4b37-acc7-586a290ba73a",
+            "exec": [
+              "postman.setNextRequest(null)\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Verify string in response\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"data\");\r",
+              "});\r",
+              "console.log(\"Get user response\"+ pm.response.json())\r",
+              "console.log(\"print email :\" + pm.iterationData.get(\"email\"))\r",
+              "console.log(\"print password :\" + pm.iterationData.get(\"password\"))\r",
+              "pm.test(\"Verify email address in response\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.data.email).to.eql(pm.iterationData.get(\"email\"));\r",
+              "});\r",
+              "\r",
+              "\r",
+              "\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "4795e0b1-77ea-4bbe-9d48-b056bbdf3d23",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/users/{{userId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "LOGIN",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "cac78306-c007-4d81-96ab-e484ee7f8466",
+            "exec": [
+              "postman.setNextRequest('GET USER');\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    var responseData = pm.response.json();\r",
+              "    pm.collectionVariables.set(\"token\", responseData.token)\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Body matches string\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"token\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 700ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(700);\r",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "86f60736-2f41-45d5-aae3-06482b498ef5",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/login"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "7d94d5e6-e282-4cd8-9df9-64486afe1f7a",
+        "type": "text/javascript",
+        "exec": [
+          "// Set collection_variable",
+          "// pm.collecionVariables.set(\"email\", pm.iterationData.get(\"email\"));",
+          "// pm.collectionVariables.set(\"password\", pm.iterationData.get(\"password\"));",
+          "// pm.globals.set(\"email\", pm.iterationData.get(\"email\"))",
+          "// pm.globals.set(\"password\", pm.iterationData.get(\"password\"))",
+          "",
+          "// //Display varianbles",
+          "// console.log(\"email :\" + pm.globals.get(\"email\"));",
+          "// console.log(\"Password : \"+pm.globals.get(\"password\"));",
+          "// pm.collectionVariables.unset('userId')",
+          "// pm.collectionVariables.clear()",
+          "// console.log(\"userId after unset :\"+pm.collectionVariables.get('userId'))",
+          "",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "0c0d7c1f-a7ab-4026-91a1-bd32e94c886d",
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "id": "0df7b9e9-8ba0-4766-aab2-86eec582c9c5",
+      "key": "email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "2bf27431-6f06-4f21-84c2-d5347c4e35da",
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "c76d77f2-bc73-443b-9d21-4a1d48a4b452",
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "9c4bb918-d77e-49f1-878d-98226531cfce",
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
